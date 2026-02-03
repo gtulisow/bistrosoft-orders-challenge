@@ -29,24 +29,49 @@ public class GlobalExceptionMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred: {Message}", ex.Message);
             await HandleExceptionAsync(context, ex);
         }
     }
 
     private Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
+        var traceId = context.TraceIdentifier;
+        var requestPath = context.Request.Path.Value ?? "unknown";
+        var requestMethod = context.Request.Method;
+
         var (statusCode, title) = exception switch
         {
             ValidationException => (HttpStatusCode.BadRequest, "Validation Error"),
             NotFoundException => (HttpStatusCode.NotFound, "Resource Not Found"),
             UnauthorizedException => (HttpStatusCode.Unauthorized, "Unauthorized"),
             ForbiddenException => (HttpStatusCode.Forbidden, "Forbidden"),
-            // 409 Conflict is more semantically correct for business rule violations
-            // where the state transition is invalid due to current state
             InvalidOrderStatusTransitionException => (HttpStatusCode.Conflict, "Invalid State Transition"),
             _ => (HttpStatusCode.InternalServerError, "Internal Server Error")
         };
+
+        // Log con nivel apropiado según el tipo de excepción
+        if (exception is DomainException)
+        {
+            // Excepciones conocidas/controladas → Warning
+            _logger.LogWarning(exception,
+                "Domain exception occurred | Type={ExceptionType} StatusCode={StatusCode} Method={RequestMethod} Path={RequestPath} TraceId={TraceId}",
+                exception.GetType().Name,
+                (int)statusCode,
+                requestMethod,
+                requestPath,
+                traceId);
+        }
+        else
+        {
+            // Excepciones inesperadas → Error
+            _logger.LogError(exception,
+                "Unhandled exception occurred | Type={ExceptionType} StatusCode={StatusCode} Method={RequestMethod} Path={RequestPath} TraceId={TraceId}",
+                exception.GetType().Name,
+                (int)statusCode,
+                requestMethod,
+                requestPath,
+                traceId);
+        }
 
         // SECURITY: In production, don't expose detailed error messages for 500 errors
         var detail = GetSafeErrorDetail(exception, statusCode);
@@ -61,9 +86,9 @@ public class GlobalExceptionMiddleware
         };
 
         // Add trace ID for debugging
-        if (context.TraceIdentifier is not null)
+        if (traceId is not null)
         {
-            problemDetails.Extensions["traceId"] = context.TraceIdentifier;
+            problemDetails.Extensions["traceId"] = traceId;
         }
 
         context.Response.ContentType = "application/problem+json";

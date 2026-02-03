@@ -7,4 +7,4 @@ export const authApi = {
     const response = await apiClient.post<LoginResponseDto>('/api/auth/login', request)
     return response.data
   }
-}
+} 

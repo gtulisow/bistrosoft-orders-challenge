@@ -320,7 +320,7 @@ export interface LoginResponseDto {
 ### 8. **`.env`** y **`.env.example`** (ACTUALIZADO)
 
 ```env
-VITE_API_BASE_URL=http://localhost:5000/api
+VITE_API_BASE_URL=http://localhost:8080/api
 ```
 
 Ahora incluye `/api` en la base URL.

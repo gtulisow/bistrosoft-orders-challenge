@@ -70,7 +70,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
             if (product.StockQuantity < itemRequest.Quantity)
             {
                 throw new ValidationException(
-                    $"Insufficient stock for product '{product.Name}'. ");
+                    $"Insufficient stock for product '{product.Name}'. " +
+                    $"Available: {product.StockQuantity}, Requested: {itemRequest.Quantity}");
             }
 
             // Add item to order (using product's current price)

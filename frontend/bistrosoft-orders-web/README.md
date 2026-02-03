@@ -18,7 +18,7 @@ Frontend moderno construido con Vue 3 + Vite + TypeScript para el sistema de ges
 - Node.js 18+ 
 - npm o yarn
 - nvm (opcional, pero recomendado)
-- Backend de Bistrosoft Orders corriendo (por defecto en `http://localhost:5000`)
+- Backend de Bistrosoft Orders corriendo (por defecto en `http://localhost:8080`)
 
 ## 🛠️ Instalación
 
@@ -51,7 +51,7 @@ cp .env.example .env
 
 2. **Editar el archivo `.env`:**
 ```env
-VITE_API_BASE_URL=http://localhost:5000
+VITE_API_BASE_URL=http://localhost:8080/api
 ```
 
 Ajusta la URL según donde esté corriendo tu backend.
