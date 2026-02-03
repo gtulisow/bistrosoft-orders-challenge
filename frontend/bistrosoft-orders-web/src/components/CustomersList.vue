@@ -1,39 +1,49 @@
 <template>
   <div class="customers-list-container">
     <div class="list-header">
-      <h2>Clientes Creados</h2>
+      <h2>Clientes Registrados</h2>
       <div class="filter-section">
         <input
-          v-model="filterText"
+          :value="searchText"
+          @input="handleSearchInput"
           type="text"
           placeholder="🔍 Buscar por nombre, email o ID..."
           class="filter-input"
+          :disabled="loading"
         />
-        <span class="text-sm text-gray-500">{{ filteredCustomers.length }} cliente(s)</span>
+        <span class="text-sm text-gray-500">{{ count }} cliente(s)</span>
       </div>
     </div>
 
-    <div v-if="filteredCustomers.length === 0" class="empty-state">
+    <div v-if="error" class="alert alert-error">
+      {{ error }}
+    </div>
+
+    <div v-if="loading" class="loading-state">
+      <div class="spinner-sm"></div>
+      <span>Cargando clientes...</span>
+    </div>
+
+    <div v-else-if="customers.length === 0" class="empty-state">
       <div class="empty-icon">👥</div>
-      <p v-if="!filterText">Aún no hay clientes. Creá el primero arriba.</p>
-      <p v-else>No se encontraron clientes con "{{ filterText }}"</p>
+      <p v-if="!searchText">Aún no hay clientes registrados. Creá el primero arriba.</p>
+      <p v-else>No se encontraron clientes con "{{ searchText }}"</p>
     </div>
 
     <div v-else class="customers-grid">
       <div
-        v-for="(customer, index) in filteredCustomers"
-        :key="customer.id || `customer-${index}`"
+        v-for="customer in customers"
+        :key="customer.id"
         class="customer-card"
       >
         <div class="customer-main">
           <div class="customer-info">
-            <h3>{{ customer.name || 'Sin nombre' }}</h3>
-            <p class="email">{{ customer.email || 'Sin email' }}</p>
+            <h3>{{ customer.name }}</h3>
+            <p class="email">{{ customer.email }}</p>
             <p v-if="customer.phoneNumber" class="phone">📞 {{ customer.phoneNumber }}</p>
-            <p v-if="customer.id" class="customer-id">
+            <p class="customer-id">
               ID: {{ customer.id.substring(0, 8) }}...
             </p>
-            <p class="created-at">{{ formatRelativeDate(customer.createdAtIso) }}</p>
           </div>
         </div>
         
@@ -50,7 +60,7 @@
             class="btn btn-primary btn-sm"
             :disabled="loading"
           >
-            👁️ Ver Detalle
+            👁️ Usar
           </button>
         </div>
       </div>
@@ -61,43 +71,35 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import type { CustomerSummary } from '@/stores/customer.store'
+import { ref } from 'vue'
+import type { CustomerListDto } from '@/models/dtos'
 import Toast from '@/components/Toast.vue'
 
-const props = defineProps<{
-  customers: CustomerSummary[]
+defineProps<{
+  customers: CustomerListDto[]
   loading?: boolean
+  error?: string | null
+  searchText?: string
+  count?: number
 }>()
 
 const emit = defineEmits<{
   select: [id: string]
+  'update:searchText': [value: string]
 }>()
 
-const filterText = ref('')
 const toastMessage = ref('')
+let searchDebounce: ReturnType<typeof setTimeout> | null = null
 
-const filteredCustomers = computed(() => {
-  if (!props.customers || props.customers.length === 0) {
-    return []
-  }
-
-  if (!filterText.value) {
-    return props.customers
-  }
-
-  const search = filterText.value.toLowerCase()
-  return props.customers.filter(customer => {
-    if (!customer) return false
-    
-    return (
-      customer.name?.toLowerCase().includes(search) ||
-      customer.email?.toLowerCase().includes(search) ||
-      customer.id?.toLowerCase().includes(search) ||
-      customer.phoneNumber?.toLowerCase().includes(search)
-    )
-  })
-})
+function handleSearchInput(event: Event) {
+  const value = (event.target as HTMLInputElement).value
+  
+  if (searchDebounce) clearTimeout(searchDebounce)
+  
+  searchDebounce = setTimeout(() => {
+    emit('update:searchText', value)
+  }, 250)
+}
 
 async function handleCopyId(id: string) {
   try {
@@ -108,34 +110,27 @@ async function handleCopyId(id: string) {
       toastMessage.value = ''
     }, 100)
   } catch (err) {
-    console.error('Error al copiar:', err)
+    // Fallback con textarea
+    const textarea = document.createElement('textarea')
+    textarea.value = id
+    textarea.style.position = 'fixed'
+    textarea.style.opacity = '0'
+    document.body.appendChild(textarea)
+    textarea.select()
+    document.execCommand('copy')
+    document.body.removeChild(textarea)
+    
+    toastMessage.value = '✓ ID copiado'
+    setTimeout(() => {
+      toastMessage.value = ''
+    }, 100)
   }
-}
-
-function formatRelativeDate(isoString: string): string {
-  const date = new Date(isoString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60000)
-  const diffHours = Math.floor(diffMs / 3600000)
-  const diffDays = Math.floor(diffMs / 86400000)
-
-  if (diffMins < 1) return 'Hace un momento'
-  if (diffMins < 60) return `Hace ${diffMins} minuto${diffMins > 1 ? 's' : ''}`
-  if (diffHours < 24) return `Hace ${diffHours} hora${diffHours > 1 ? 's' : ''}`
-  if (diffDays < 7) return `Hace ${diffDays} día${diffDays > 1 ? 's' : ''}`
-  
-  return new Intl.DateTimeFormat('es-MX', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  }).format(date)
 }
 </script>
 
 <style scoped>
 .customers-list-container {
-  margin-top: 2rem;
+  margin-top: 0;
 }
 
 .list-header {
@@ -166,6 +161,20 @@ function formatRelativeDate(isoString: string): string {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.filter-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem;
+  color: var(--gray-600);
 }
 
 .empty-state {
@@ -239,13 +248,7 @@ function formatRelativeDate(isoString: string): string {
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
   display: inline-block;
-  margin-bottom: 0.5rem;
-}
-
-.created-at {
-  font-size: 0.75rem;
-  color: var(--gray-500);
-  font-style: italic;
+  margin-top: 0.5rem;
 }
 
 .customer-actions {

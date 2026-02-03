@@ -13,6 +13,13 @@ export interface CustomerDto {
   orders: OrderSummaryDto[]
 }
 
+export interface CustomerListDto {
+  id: string
+  name: string
+  email: string
+  phoneNumber: string | null
+}
+
 // Order DTOs
 export interface CreateOrderRequest {
   customerId: string

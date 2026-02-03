@@ -1,13 +1,11 @@
 <template>
-  <Transition name="toast-slide">
-    <div v-if="visible" class="toast" :class="toastClass">
-      <span>{{ message }}</span>
-    </div>
-  </Transition>
+  <div v-show="message" class="toast" :class="toastClass">
+    <span>{{ message }}</span>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps<{
   message: string
@@ -15,33 +13,7 @@ const props = defineProps<{
   duration?: number
 }>()
 
-const visible = ref(false)
 const toastClass = computed(() => `toast-${props.type || 'success'}`)
-
-let timeout: ReturnType<typeof setTimeout> | null = null
-
-watch(() => props.message, (newMessage) => {
-  if (newMessage) {
-    visible.value = true
-    
-    if (timeout) clearTimeout(timeout)
-    timeout = setTimeout(() => {
-      visible.value = false
-    }, props.duration || 1500)
-  } else {
-    visible.value = false
-  }
-})
-
-// Auto-mostrar si message está presente al montar
-onMounted(() => {
-  if (props.message) {
-    visible.value = true
-    timeout = setTimeout(() => {
-      visible.value = false
-    }, props.duration || 1500)
-  }
-})
 </script>
 
 <style scoped>
@@ -56,6 +28,7 @@ onMounted(() => {
   z-index: 10000;
   min-width: 200px;
   text-align: center;
+  animation: slideIn 0.3s ease;
 }
 
 .toast-success {
@@ -73,18 +46,14 @@ onMounted(() => {
   color: white;
 }
 
-.toast-slide-enter-active,
-.toast-slide-leave-active {
-  transition: all 0.3s ease;
-}
-
-.toast-slide-enter-from {
-  transform: translateY(100px);
-  opacity: 0;
-}
-
-.toast-slide-leave-to {
-  transform: translateY(100px);
-  opacity: 0;
+@keyframes slideIn {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 </style>

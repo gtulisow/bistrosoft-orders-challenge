@@ -1,26 +1,21 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import type { CustomerDto, OrderSummaryDto } from '@/models/dtos'
+import { ref, computed } from 'vue'
+import type { CustomerDto, OrderSummaryDto, CustomerListDto } from '@/models/dtos'
 import { customersApi } from '@/api/customers.api'
 import { ordersApi } from '@/api/orders.api'
 
-const STORAGE_KEY = 'customers.created.list.v1'
-const MAX_CUSTOMERS = 50
-
-export interface CustomerSummary {
-  id: string
-  name: string
-  email: string
-  phoneNumber?: string
-  createdAtIso: string
-}
-
 export const useCustomerStore = defineStore('customer', () => {
+  // Estado para detalle de cliente (flujo existente)
   const currentCustomer = ref<CustomerDto | null>(null)
   const orders = ref<OrderSummaryDto[]>([])
-  const createdCustomers = ref<CustomerSummary[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
+
+  // Estado para lista de clientes
+  const customersList = ref<CustomerListDto[]>([])
+  const customersListLoading = ref(false)
+  const customersListError = ref<string | null>(null)
+  const customersListSearch = ref('')
 
   async function fetchCustomer(id: string) {
     loading.value = true
@@ -58,89 +53,58 @@ export const useCustomerStore = defineStore('customer', () => {
     error.value = null
   }
 
-  function addCreatedCustomer(customer: CustomerDto) {
-    // Validar que customer tenga las propiedades requeridas
-    if (!customer || !customer.id || !customer.name || !customer.email) {
-      console.error('Invalid customer data:', customer)
-      return
+  // Computed: lista filtrada de clientes
+  const filteredCustomersList = computed(() => {
+    if (!customersListSearch.value) {
+      return customersList.value
     }
 
-    const summary: CustomerSummary = {
-      id: customer.id,
-      name: customer.name,
-      email: customer.email,
-      phoneNumber: customer.phoneNumber || undefined,
-      createdAtIso: new Date().toISOString()
-    }
+    const search = customersListSearch.value.toLowerCase()
+    return customersList.value.filter(customer =>
+      customer.name?.toLowerCase().includes(search) ||
+      customer.email?.toLowerCase().includes(search) ||
+      customer.id?.toLowerCase().includes(search) ||
+      customer.phoneNumber?.toLowerCase().includes(search)
+    )
+  })
 
-    // Evitar duplicados
-    const exists = createdCustomers.value.some(c => c.id === customer.id)
-    if (!exists) {
-      // Agregar al inicio (más recientes primero)
-      createdCustomers.value.unshift(summary)
-      
-      // Mantener máximo 50 clientes
-      if (createdCustomers.value.length > MAX_CUSTOMERS) {
-        createdCustomers.value = createdCustomers.value.slice(0, MAX_CUSTOMERS)
-      }
+  const customersListCount = computed(() => filteredCustomersList.value.length)
 
-      // Persistir en localStorage
-      persistCreatedCustomers()
-    }
-  }
+  // Acción: obtener lista de clientes desde backend
+  async function fetchCustomersList() {
+    customersListLoading.value = true
+    customersListError.value = null
 
-  function removeCreatedCustomer(id: string) {
-    createdCustomers.value = createdCustomers.value.filter(c => c.id !== id)
-    persistCreatedCustomers()
-  }
-
-  function persistCreatedCustomers() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(createdCustomers.value))
-    } catch (err) {
-      console.error('Error al guardar clientes en localStorage:', err)
+      customersList.value = await customersApi.getAll()
+    } catch (err: any) {
+      customersListError.value = err.message || 'Error al cargar la lista de clientes'
+      customersList.value = []
+    } finally {
+      customersListLoading.value = false
     }
   }
 
-  function restoreCreatedCustomers() {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        
-        // Validar que sea un array y que cada item tenga las propiedades requeridas
-        if (Array.isArray(parsed)) {
-          createdCustomers.value = parsed.filter(customer => 
-            customer &&
-            customer.id &&
-            customer.name &&
-            customer.email &&
-            customer.createdAtIso
-          )
-        } else {
-          createdCustomers.value = []
-        }
-      }
-    } catch (err) {
-      console.error('Error al restaurar clientes de localStorage:', err)
-      createdCustomers.value = []
-      // Limpiar localStorage corrupto
-      localStorage.removeItem(STORAGE_KEY)
-    }
+  function setCustomersListSearch(value: string) {
+    customersListSearch.value = value
   }
 
   return {
     currentCustomer,
     orders,
-    createdCustomers,
+    customersList,
+    filteredCustomersList,
+    customersListCount,
+    customersListLoading,
+    customersListError,
+    customersListSearch,
     loading,
     error,
     fetchCustomer,
     refreshOrders,
+    fetchCustomersList,
+    setCustomersListSearch,
     clearCustomer,
-    clearError,
-    addCreatedCustomer,
-    removeCreatedCustomer,
-    restoreCreatedCustomers
+    clearError
   }
 })
