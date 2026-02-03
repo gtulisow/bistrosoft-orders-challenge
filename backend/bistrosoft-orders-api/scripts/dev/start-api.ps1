@@ -25,10 +25,12 @@ Write-Host "🛑 Deteniendo procesos anteriores en puerto 8080..." -ForegroundCo
 $process = Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
 if ($process) {
     Stop-Process -Id $process -Force -ErrorAction SilentlyContinue
-    Write-Host "   Proceso detenido" -ForegroundColor Green
 }
 
 Write-Host "▶️  Iniciando API..." -ForegroundColor Green
 Write-Host ""
 
 dotnet run --project src/Bistrosoft.Orders.Api
+
+# Nota: Este script se ejecuta en foreground
+# Para ejecutar en background, usa: Start-Job -ScriptBlock { .\start-api.ps1 }

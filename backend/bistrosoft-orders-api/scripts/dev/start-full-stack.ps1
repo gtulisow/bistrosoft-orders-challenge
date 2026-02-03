@@ -51,9 +51,37 @@ Write-Host "🚀 Levantando servicios..." -ForegroundColor Green
 docker-compose -f docker-compose.full.yml up -d
 
 Write-Host ""
-Write-Host "⏳ Esperando a que los servicios estén listos..." -ForegroundColor Yellow
-Write-Host "   (SQL Server puede tardar 10-15 segundos en iniciar)" -ForegroundColor Gray
-Start-Sleep -Seconds 15
+Write-Host "⏳ Esperando a que SQL Server esté listo..." -ForegroundColor Yellow
+Write-Host "   (Puede tardar 20-30 segundos en iniciar completamente)" -ForegroundColor Gray
+Start-Sleep -Seconds 30
+
+Write-Host ""
+Write-Host "🔍 Verificando que SQL Server esté healthy..." -ForegroundColor Cyan
+$retries = 0
+$maxRetries = 12
+$healthy = $false
+
+while (-not $healthy -and $retries -lt $maxRetries) {
+    try {
+        $inspection = docker inspect bistrosoft-sqlserver | ConvertFrom-Json
+        if ($inspection[0].State.Health.Status -eq "healthy") {
+            $healthy = $true
+            Write-Host "✅ SQL Server está healthy" -ForegroundColor Green
+        } else {
+            $retries++
+            Write-Host "   Intento $retries/$maxRetries - Esperando..." -ForegroundColor Gray
+            Start-Sleep -Seconds 5
+        }
+    } catch {
+        $retries++
+        Write-Host "   Intento $retries/$maxRetries - Esperando..." -ForegroundColor Gray
+        Start-Sleep -Seconds 5
+    }
+}
+
+if (-not $healthy) {
+    Write-Host "⚠️  SQL Server no está healthy, pero continuando..." -ForegroundColor Yellow
+}
 
 Write-Host ""
 Write-Host "🔍 Verificando estado de los servicios..." -ForegroundColor Cyan

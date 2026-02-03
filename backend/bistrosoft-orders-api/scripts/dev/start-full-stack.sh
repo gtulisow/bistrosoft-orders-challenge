@@ -28,9 +28,9 @@ echo "🛑 Deteniendo instancias anteriores..."
 # Detener contenedores Docker
 docker-compose -f docker-compose.full.yml down 2>/dev/null || true
 
-# Detener procesos locales en puerto 5000
-echo "   Liberando puerto 5000..."
-lsof -ti:5000 | xargs kill -9 2>/dev/null || true
+# Detener procesos locales en puerto 8080
+echo "   Liberando puerto 8080..."
+lsof -ti:8080 | xargs kill -9 2>/dev/null || true
 pkill -f "Bistrosoft.Orders.Api" 2>/dev/null || true
 
 echo ""
