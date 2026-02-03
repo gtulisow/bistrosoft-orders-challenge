@@ -1,0 +1,203 @@
+### Bistrosoft Orders API - Test Requests
+### Usar con REST Client extension de VS Code o cualquier cliente HTTP
+
+@baseUrl = http://localhost:5000/api
+@contentType = application/json
+
+###############################################
+# CUSTOMERS
+###############################################
+
+### 1. Create Customer
+POST {{baseUrl}}/customers
+Content-Type: {{contentType}}
+
+{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "phoneNumber": "+1234567890"
+}
+
+### 2. Create Another Customer
+POST {{baseUrl}}/customers
+Content-Type: {{contentType}}
+
+{
+  "name": "Jane Smith",
+  "email": "jane.smith@example.com",
+  "phoneNumber": "+0987654321"
+}
+
+### 3. Get Customer by ID (replace with actual GUID)
+GET {{baseUrl}}/customers/REPLACE-WITH-CUSTOMER-GUID
+
+### 4. Get Customer Orders (replace with actual GUID)
+GET {{baseUrl}}/customers/REPLACE-WITH-CUSTOMER-GUID/orders
+
+### 5. Try to create customer with duplicate email (should fail with 400)
+POST {{baseUrl}}/customers
+Content-Type: {{contentType}}
+
+{
+  "name": "Duplicate User",
+  "email": "john.doe@example.com",
+  "phoneNumber": "+1111111111"
+}
+
+###############################################
+# ORDERS
+###############################################
+
+### 6. Create Order (replace GUIDs with actual values from seeded products)
+# Products seeded by default:
+# - Laptop Dell XPS 15 (stock: 25)
+# - iPhone 15 Pro (stock: 50)
+# - Sony WH-1000XM5 Headphones (stock: 100)
+# - Samsung 4K Monitor 27" (stock: 30)
+# - Logitech MX Master 3 Mouse (stock: 75)
+POST {{baseUrl}}/orders
+Content-Type: {{contentType}}
+
+{
+  "customerId": "REPLACE-WITH-CUSTOMER-GUID",
+  "items": [
+    {
+      "productId": "REPLACE-WITH-PRODUCT-GUID-1",
+      "quantity": 2
+    },
+    {
+      "productId": "REPLACE-WITH-PRODUCT-GUID-2",
+      "quantity": 1
+    }
+  ]
+}
+
+### 7. Create Order with insufficient stock (should fail with 400)
+POST {{baseUrl}}/orders
+Content-Type: {{contentType}}
+
+{
+  "customerId": "REPLACE-WITH-CUSTOMER-GUID",
+  "items": [
+    {
+      "productId": "REPLACE-WITH-PRODUCT-GUID",
+      "quantity": 999
+    }
+  ]
+}
+
+### 8. Create Order with non-existent product (should fail with 404)
+POST {{baseUrl}}/orders
+Content-Type: {{contentType}}
+
+{
+  "customerId": "REPLACE-WITH-CUSTOMER-GUID",
+  "items": [
+    {
+      "productId": "00000000-0000-0000-0000-000000000000",
+      "quantity": 1
+    }
+  ]
+}
+
+###############################################
+# ORDER STATUS UPDATES
+###############################################
+
+### 9. Update Order Status: Pending -> Paid
+PUT {{baseUrl}}/orders/REPLACE-WITH-ORDER-GUID/status
+Content-Type: {{contentType}}
+
+{
+  "newStatus": "Paid"
+}
+
+### 10. Update Order Status: Paid -> Shipped
+PUT {{baseUrl}}/orders/REPLACE-WITH-ORDER-GUID/status
+Content-Type: {{contentType}}
+
+{
+  "newStatus": "Shipped"
+}
+
+### 11. Update Order Status: Shipped -> Delivered
+PUT {{baseUrl}}/orders/REPLACE-WITH-ORDER-GUID/status
+Content-Type: {{contentType}}
+
+{
+  "newStatus": "Delivered"
+}
+
+### 12. Update Order Status: Pending -> Cancelled
+PUT {{baseUrl}}/orders/REPLACE-WITH-ORDER-GUID/status
+Content-Type: {{contentType}}
+
+{
+  "newStatus": "Cancelled"
+}
+
+### 13. Invalid Transition: Pending -> Shipped (should fail with 409)
+PUT {{baseUrl}}/orders/REPLACE-WITH-ORDER-GUID/status
+Content-Type: {{contentType}}
+
+{
+  "newStatus": "Shipped"
+}
+
+### 14. Invalid Transition: Paid -> Cancelled (should fail with 409)
+PUT {{baseUrl}}/orders/REPLACE-WITH-ORDER-GUID/status
+Content-Type: {{contentType}}
+
+{
+  "newStatus": "Cancelled"
+}
+
+###############################################
+# EDGE CASES
+###############################################
+
+### 15. Get non-existent customer (should return 404)
+GET {{baseUrl}}/customers/00000000-0000-0000-0000-000000000000
+
+### 16. Create customer with invalid email (should fail with 400)
+POST {{baseUrl}}/customers
+Content-Type: {{contentType}}
+
+{
+  "name": "Invalid Email User",
+  "email": "not-an-email",
+  "phoneNumber": "+1234567890"
+}
+
+### 17. Create customer with empty name (should fail with 400)
+POST {{baseUrl}}/customers
+Content-Type: {{contentType}}
+
+{
+  "name": "",
+  "email": "test@example.com",
+  "phoneNumber": "+1234567890"
+}
+
+### 18. Create order with empty items (should fail with 400)
+POST {{baseUrl}}/orders
+Content-Type: {{contentType}}
+
+{
+  "customerId": "REPLACE-WITH-CUSTOMER-GUID",
+  "items": []
+}
+
+### 19. Create order with zero quantity (should fail with 400)
+POST {{baseUrl}}/orders
+Content-Type: {{contentType}}
+
+{
+  "customerId": "REPLACE-WITH-CUSTOMER-GUID",
+  "items": [
+    {
+      "productId": "REPLACE-WITH-PRODUCT-GUID",
+      "quantity": 0
+    }
+  ]
+}
