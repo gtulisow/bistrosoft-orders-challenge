@@ -105,6 +105,33 @@ public class CustomerRepositoryTests
     }
 
     [Fact]
+    public async Task GetAllAsync_ShouldReturnAllCustomers_OrderedByName()
+    {
+        // Arrange
+        using var context = InMemoryDbContextFactory.CreateDbContext();
+        var repository = new CustomerRepository(context);
+        
+        var zara = EntityBuilder.CreateCustomer(name: "Zara Smith", email: "zara@example.com");
+        var ana = EntityBuilder.CreateCustomer(name: "Ana García", email: "ana@example.com");
+        var mario = EntityBuilder.CreateCustomer(name: "Mario López", email: "mario@example.com");
+
+        await repository.AddAsync(zara);
+        await repository.AddAsync(ana);
+        await repository.AddAsync(mario);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repository.GetAllAsync(CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(3, result.Count);
+        Assert.Equal("Ana García", result[0].Name);
+        Assert.Equal("Mario López", result[1].Name);
+        Assert.Equal("Zara Smith", result[2].Name);
+    }
+
+    [Fact]
     public async Task UpdateAsync_ShouldUpdateCustomer_InDatabase()
     {
         // Arrange

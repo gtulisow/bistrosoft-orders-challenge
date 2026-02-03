@@ -26,6 +26,12 @@ public class FakeCustomerRepository : ICustomerRepository
         return Task.FromResult(customer);
     }
 
+    public Task<IReadOnlyList<Customer>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        var customers = _customers.Values.OrderBy(c => c.Name).ToList();
+        return Task.FromResult<IReadOnlyList<Customer>>(customers);
+    }
+
     public Task AddAsync(Customer customer, CancellationToken cancellationToken = default)
     {
         _customers[customer.Id] = customer;

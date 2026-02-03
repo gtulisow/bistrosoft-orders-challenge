@@ -28,7 +28,7 @@
 
     <div class="orders-summary">
       <h3>Resumen de Pedidos</h3>
-      <div v-if="customer.orders.length === 0" class="no-orders">
+      <div v-if="!customer.orders || customer.orders.length === 0" class="no-orders">
         No hay pedidos registrados para este cliente.
       </div>
       <div v-else class="orders-list">

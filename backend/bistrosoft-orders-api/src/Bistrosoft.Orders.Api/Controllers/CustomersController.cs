@@ -1,5 +1,6 @@
 using Bistrosoft.Orders.Application.Commands.Customers.CreateCustomer;
 using Bistrosoft.Orders.Application.DTOs;
+using Bistrosoft.Orders.Application.Queries.Customers.GetAllCustomers;
 using Bistrosoft.Orders.Application.Queries.Customers.GetCustomerById;
 using Bistrosoft.Orders.Application.Queries.Orders.GetOrdersByCustomer;
 using MediatR;
@@ -22,6 +23,23 @@ public class CustomersController : ControllerBase
     public CustomersController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+
+    /// <summary>
+    /// Returns all registered customers in the system
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>List of customers ordered by name</returns>
+    /// <response code="200">Customers retrieved successfully</response>
+    /// <response code="401">Unauthorized - JWT token required</response>
+    [HttpGet]
+    [ProducesResponseType(typeof(List<CustomerListDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetAllCustomers(CancellationToken cancellationToken)
+    {
+        var query = new GetAllCustomersQuery();
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>

@@ -214,23 +214,51 @@ async function handleCancel(orderId: string) {
 
 .actions-cell {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .status-select {
-  padding: 0.375rem 0.5rem;
-  font-size: 0.8125rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
   border-radius: var(--border-radius);
-  border: 1px solid var(--gray-300);
+  border: 2px solid var(--gray-300);
+  background-color: white;
+  color: var(--gray-700);
   cursor: pointer;
   min-width: 180px;
+  max-width: 200px;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.status-select:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
 .status-select:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background-color: var(--gray-100);
+}
+
+.status-select option {
+  padding: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.status-select option:first-child {
+  color: var(--gray-500);
+  font-style: italic;
 }
 
 .no-actions-text {

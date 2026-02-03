@@ -22,15 +22,29 @@
 
         <div class="form-group">
           <label for="password">Contraseña</label>
-          <input
-            id="password"
-            v-model="form.password"
-            type="password"
-            placeholder="••••••••"
-            required
-            :disabled="authStore.isLoggingIn"
-            autocomplete="current-password"
-          />
+          <div class="password-input-wrapper">
+            <input
+              id="password"
+              v-model="form.password"
+              type="text"
+              placeholder="Ingresa tu contraseña"
+              required
+              :disabled="authStore.isLoggingIn"
+              autocomplete="current-password"
+              :class="['password-input', { 'password-hidden': !showPassword }]"
+            />
+            <button
+              type="button"
+              @click="showPassword = !showPassword"
+              class="password-toggle"
+              :disabled="authStore.isLoggingIn"
+              tabindex="-1"
+              :title="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <span v-if="showPassword">👁️</span>
+              <span v-else>👁️‍🗨️</span>
+            </button>
+          </div>
         </div>
 
         <div v-if="authStore.loginError" class="alert alert-error">
@@ -56,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 
@@ -67,6 +81,8 @@ const form = reactive({
   email: '',
   password: ''
 })
+
+const showPassword = ref(false)
 
 async function handleLogin() {
   authStore.clearError()
@@ -122,6 +138,53 @@ form {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input {
+  width: 100%;
+  padding-right: 3rem;
+}
+
+.password-input.password-hidden {
+  -webkit-text-security: disc;
+  text-security: disc;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 1.25rem;
+  color: var(--gray-500);
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.password-toggle:hover:not(:disabled) {
+  color: var(--primary-color);
+}
+
+.password-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.password-toggle:focus {
+  outline: none;
 }
 
 .btn-block {
