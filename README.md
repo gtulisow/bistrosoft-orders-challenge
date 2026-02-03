@@ -100,7 +100,7 @@ code .
 
 # 2. Presionar F5 para debug
 # 3. Seleccionar perfil: "Development (HTTP + Swagger)"
-# 4. La API se abre automáticamente en http://localhost:5000/swagger
+# 4. La API se abre automáticamente en http://localhost:8080/swagger
 ```
 
 #### Visual Studio 2022
@@ -109,7 +109,7 @@ code .
 backend/bistrosoft-orders-api/Bistrosoft.Orders.sln
 
 # 2. Presionar F5
-# 3. Se abre automáticamente en http://localhost:5000/swagger
+# 3. Se abre automáticamente en http://localhost:8080/swagger
 ```
 
 ### Opción 2: Desde Terminal
@@ -125,7 +125,7 @@ cd backend/bistrosoft-orders-api
 dotnet run --project src/Bistrosoft.Orders.Api
 
 # 4. Abrir en el navegador
-# http://localhost:5000/swagger
+# http://localhost:8080/swagger
 ```
 
 ### Compilar y Testear
@@ -183,7 +183,7 @@ npm install
 npm run dev
 
 # 4. Abrir en el navegador
-# http://localhost:5173
+# http://localhost:3000
 ```
 
 ### Opción 2: Desde Terminal
@@ -202,7 +202,7 @@ cp .env.example .env
 npm run dev
 
 # 5. Abrir en el navegador
-# http://localhost:5173
+# http://localhost:3000
 ```
 
 ### Comandos del Frontend
@@ -228,7 +228,7 @@ npm run lint
 Editar `frontend/bistrosoft-orders-web/.env`:
 
 ```env
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:8080
 ```
 
 ---
@@ -248,7 +248,7 @@ VITE_API_URL=http://localhost:5000/api
 ### 1. Usando Swagger (Backend)
 
 ```
-http://localhost:5000/swagger
+http://localhost:8080/swagger
 ```
 
 - Documentación interactiva
@@ -258,7 +258,7 @@ http://localhost:5000/swagger
 ### 2. Usando el Frontend
 
 ```
-http://localhost:5173
+http://localhost:3000
 ```
 
 - Interface de usuario completa
@@ -272,7 +272,7 @@ Ver ejemplos en: `docs/api-examples.http`
 
 ```bash
 # Crear cliente
-curl -X POST http://localhost:5000/api/customers \
+curl -X POST http://localhost:8080/api/customers \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Doe",
@@ -300,8 +300,8 @@ cd frontend/bistrosoft-orders-web
 npm run dev
 
 # Abrir en el navegador:
-# - Frontend: http://localhost:5173
-# - Backend Swagger: http://localhost:5000/swagger
+# - Frontend: http://localhost:3000
+# - Backend Swagger: http://localhost:8080/swagger
 ```
 
 ### Desarrollo Solo Backend
@@ -315,7 +315,7 @@ cd backend/bistrosoft-orders-api
 dotnet run --project src/Bistrosoft.Orders.Api
 
 # Probar con Swagger:
-# http://localhost:5000/swagger
+# http://localhost:8080/swagger
 ```
 
 ---
@@ -331,47 +331,6 @@ dotnet run --project src/Bistrosoft.Orders.Api
 - `POST /api/orders` - Crear orden (valida stock)
 - `PUT /api/orders/{id}/status` - Actualizar estado de orden
 
-### Productos
-Los productos se seedean automáticamente:
-- Laptop Dell XPS 15 ($1,499.99)
-- iPhone 15 Pro ($999.99)
-- Sony WH-1000XM5 Headphones ($349.99)
-- Samsung 4K Monitor 27" ($399.99)
-- Logitech MX Master 3 Mouse ($99.99)
-
----
-
-## 🏗️ Arquitectura
-
-### Backend - Hexagonal Architecture
-
-```
-API Layer (Adapters - Entrada)
-  ↓ MediatR
-Application Layer (Casos de Uso - Puertos)
-  ↓ Interfaces
-Infrastructure Layer (Adapters - Salida)
-  ↓
-Domain Layer (Núcleo - Sin dependencias)
-```
-
-**Principios:**
-- ✅ Domain independiente de frameworks
-- ✅ Application define puertos (interfaces)
-- ✅ Infrastructure implementa adaptadores
-- ✅ API layer delgado (solo routing)
-
-### Frontend - Component Architecture
-
-```
-Views (Pages)
-  ↓
-Stores (Pinia - State Management)
-  ↓
-API Clients (HTTP)
-  ↓
-Backend API
-```
 
 ---
 
@@ -410,21 +369,21 @@ docker ps | grep bistrosoft-sqlserver
 # 2. Si no está corriendo
 docker-compose up -d
 
-# 3. Verificar puerto 5000 libre
-lsof -ti:5000
+# 3. Verificar puerto 8080 libre
+lsof -ti:8080
 # Si hay proceso, matarlo:
-kill -9 $(lsof -ti:5000)
+kill -9 $(lsof -ti:8080)
 ```
 
 ### Frontend no conecta con Backend
 
 ```bash
 # 1. Verificar que backend esté corriendo
-curl http://localhost:5000/api/customers
+curl http://localhost:8080/api/customers
 
 # 2. Verificar variable de entorno
 cat frontend/bistrosoft-orders-web/.env
-# Debe tener: VITE_API_URL=http://localhost:5000/api
+# Debe tener: VITE_API_URL=http://localhost:8080/api
 
 # 3. Verificar CORS en backend (ya configurado)
 ```
@@ -449,84 +408,10 @@ docker-compose up -d
 
 - **Backend API**: `backend/bistrosoft-orders-api/README.md`
 - **Frontend**: `frontend/bistrosoft-orders-web/README.md`
-- **Testing Guide**: `docs/TESTING.md`
-- **API Examples**: `docs/api-examples.http`
 
 ---
 
-## 🔐 Seguridad
-
-⚠️ **Nota**: Esta aplicación NO tiene autenticación implementada. Todos los endpoints son públicos.
-
-Para agregar JWT Authentication, ver: `frontend/bistrosoft-orders-web/JWT_AUTH_IMPLEMENTATION.md`
-
----
-
-## 🎯 Features Implementadas
-
-### Backend
-- ✅ CRUD de Customers
-- ✅ Creación de Orders con validación de stock
-- ✅ Actualización de estado de Orders (con validación de transiciones)
-- ✅ Listado de Orders por Customer
-- ✅ Seed de productos iniciales
-- ✅ Global exception handling (ProblemDetails)
-- ✅ Swagger documentation
-- ✅ EF Core Migrations
-- ✅ Unit Tests
-
-### Frontend
-- ✅ Gestión de Customers
-- ✅ Creación de Orders
-- ✅ Listado de Orders
-- ✅ State management (Pinia)
-- ✅ Responsive design
-- ✅ Error handling
-- ✅ Loading states
-
----
-
-## 👨‍💻 Desarrollo
-
-### Estructura de Branches (Opcional)
-```bash
-main           # Producción
-develop        # Desarrollo
-feature/*      # Features
-bugfix/*       # Bug fixes
-```
-
-### Commits Convencionales
-```bash
-feat: nueva funcionalidad
-fix: corrección de bug
-docs: documentación
-refactor: refactorización
-test: tests
-```
-
----
 
 ## 📄 Licencia
 
 Este proyecto es parte de un desafío técnico para Bistrosoft.
-
----
-
-## 🤝 Contacto
-
-Para preguntas sobre el proyecto, contactar al equipo de desarrollo de Bistrosoft.
-
----
-
-## 🎓 Próximos Pasos / Mejoras Futuras
-
-- [ ] Implementar JWT Authentication
-- [ ] Agregar paginación en listados
-- [ ] Implementar búsqueda y filtros
-- [ ] Agregar más tests (E2E)
-- [ ] Dockerizar backend
-- [ ] CI/CD pipeline
-- [ ] Monitoreo y logging
-- [ ] Rate limiting
-- [ ] Cache (Redis)
