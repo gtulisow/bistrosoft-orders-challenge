@@ -37,15 +37,14 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponseDt
         // Find user by email
         var user = await _userRepository.FindByEmailAsync(request.Email, cancellationToken);
 
-        if (user is null)
-        {
-            throw new UnauthorizedException("Invalid email or password.");
-        }
+        // SECURITY: Always perform password verification even if user doesn't exist
+        // This prevents timing attacks that could enumerate valid emails
+        // Use a dummy hash if user is not found to keep timing consistent
+        var passwordHash = user?.PasswordHash ?? _passwordService.HashPassword("dummy-password-for-timing");
+        var isPasswordValid = _passwordService.VerifyPassword(passwordHash, request.Password);
 
-        // Verify password
-        var isPasswordValid = _passwordService.VerifyPassword(user.PasswordHash, request.Password);
-
-        if (!isPasswordValid)
+        // Check both user existence and password validity together
+        if (user is null || !isPasswordValid)
         {
             throw new UnauthorizedException("Invalid email or password.");
         }

@@ -26,8 +26,14 @@ public static class ServiceCollectionExtensions
             options.AddPolicy("ApiCorsPolicy", policy =>
             {
                 // Configure allowed origins
-                if (allowedOrigins.Length > 0)
+                if (allowedOrigins.Length > 0 && allowedOrigins[0] == "*")
                 {
+                    // Allow all origins (Development only)
+                    policy.AllowAnyOrigin();
+                }
+                else if (allowedOrigins.Length > 0)
+                {
+                    // Allow specific origins
                     policy.WithOrigins(allowedOrigins);
                 }
                 else
@@ -37,10 +43,10 @@ public static class ServiceCollectionExtensions
                 }
 
                 // Configure credentials support
-                if (allowCredentials)
+                // Note: AllowCredentials cannot be used with AllowAnyOrigin
+                if (allowCredentials && !(allowedOrigins.Length > 0 && allowedOrigins[0] == "*"))
                 {
                     policy.AllowCredentials();
-                    // Note: When using AllowCredentials, cannot use AllowAnyOrigin
                 }
 
                 // Allow any HTTP method (GET, POST, PUT, DELETE, etc.)
