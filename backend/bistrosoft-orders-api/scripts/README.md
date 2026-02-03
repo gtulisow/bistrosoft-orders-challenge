@@ -75,7 +75,7 @@ cd scripts\dev
 ```
 
 **Resultado:**
-- 🌐 API en: `http://localhost:5000/swagger`
+- 🌐 API en: `http://localhost:8080/swagger`
 - 🗄️ SQL Server en: `localhost:1433`
 - ✅ Todo configurado y listo para usar
 
@@ -86,7 +86,7 @@ cd scripts\dev
 Inicia la API **localmente** (sin Docker, con InMemory):
 - ✅ Configura ASPNETCORE_ENVIRONMENT=Development
 - ✅ Configura SEED_ADMIN_PASSWORD
-- ✅ Detiene procesos anteriores en puerto 5000
+- ✅ Detiene procesos anteriores en puerto 8080
 - ✅ Inicia la API con `dotnet run`
 
 **Mac/Linux:**
@@ -142,7 +142,7 @@ cd scripts\dev
 .\scripts\dev\start-full-stack.ps1
 
 # Resultado:
-# ✅ API en Docker (http://localhost:5000)
+# ✅ API en Docker (http://localhost:8080)
 # ✅ SQL Server en Docker
 # ✅ Networking configurado
 # ✅ Migraciones aplicadas automáticamente
@@ -256,7 +256,7 @@ No necesitas scripts separados para instalar paquetes. ✅
 
 ## 🔗 Links Útiles
 
-- [Swagger UI](http://localhost:5000/swagger)
+- [Swagger UI](http://localhost:8080/swagger)
 - [Documentación de Testing](../docs/TESTING.md)
 - [Documentación de Serilog](../docs/SERILOG_LOGGING.md)
 

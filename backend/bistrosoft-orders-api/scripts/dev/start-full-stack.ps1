@@ -32,9 +32,9 @@ Write-Host "🛑 Deteniendo instancias anteriores..." -ForegroundColor Yellow
 # Detener contenedores Docker
 docker-compose -f docker-compose.full.yml down 2>$null
 
-# Detener procesos locales en puerto 5000
-Write-Host "   Liberando puerto 5000..." -ForegroundColor Gray
-$process = Get-NetTCPConnection -LocalPort 5000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
+# Detener procesos locales en puerto 8080
+Write-Host "   Liberando puerto 8080..." -ForegroundColor Gray
+$process = Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
 if ($process) {
     Stop-Process -Id $process -Force -ErrorAction SilentlyContinue
 }

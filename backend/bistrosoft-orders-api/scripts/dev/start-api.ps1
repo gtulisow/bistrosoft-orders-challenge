@@ -20,9 +20,9 @@ Write-Host "   Admin Password: [CONFIGURADO]"
 Write-Host "   Database: InMemory (según appsettings.Development.json)"
 Write-Host ""
 
-# Detener cualquier proceso anterior en el puerto 5000
-Write-Host "🛑 Deteniendo procesos anteriores en puerto 5000..." -ForegroundColor Yellow
-$process = Get-NetTCPConnection -LocalPort 5000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
+# Detener cualquier proceso anterior en el puerto 8080
+Write-Host "🛑 Deteniendo procesos anteriores en puerto 8080..." -ForegroundColor Yellow
+$process = Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
 if ($process) {
     Stop-Process -Id $process -Force -ErrorAction SilentlyContinue
     Write-Host "   Proceso detenido" -ForegroundColor Green

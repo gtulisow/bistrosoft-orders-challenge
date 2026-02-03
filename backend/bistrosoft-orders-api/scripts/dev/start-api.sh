@@ -18,9 +18,9 @@ echo "   Admin Password: [CONFIGURADO]"
 echo "   Database: InMemory (según appsettings.Development.json)"
 echo ""
 
-# Detener cualquier proceso anterior en el puerto 5000
-echo "🛑 Deteniendo procesos anteriores en puerto 5000..."
-lsof -ti:5000 | xargs kill -9 2>/dev/null || true
+# Detener cualquier proceso anterior en el puerto 8080
+echo "🛑 Deteniendo procesos anteriores en puerto 8080..."
+lsof -ti:8080 | xargs kill -9 2>/dev/null || true
 
 echo "▶️  Iniciando API..."
 echo ""

@@ -20,7 +20,7 @@ if ($confirmation -ne 'y' -and $confirmation -ne 'Y') {
 
 Write-Host ""
 Write-Host "🛑 Deteniendo API si está corriendo..." -ForegroundColor Yellow
-$process = Get-NetTCPConnection -LocalPort 5000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
+$process = Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
 if ($process) {
     Stop-Process -Id $process -Force -ErrorAction SilentlyContinue
 }

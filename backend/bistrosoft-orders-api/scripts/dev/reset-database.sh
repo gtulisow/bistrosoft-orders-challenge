@@ -18,7 +18,7 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 echo "🛑 Deteniendo API si está corriendo..."
-lsof -ti:5000 | xargs kill -9 2>/dev/null || true
+lsof -ti:8080 | xargs kill -9 2>/dev/null || true
 
 echo ""
 echo "📁 Eliminando migraciones antiguas..."

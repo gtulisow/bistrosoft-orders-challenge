@@ -167,18 +167,6 @@ La aplicación maneja errores del backend que sigan el estándar ProblemDetails 
 
 Los mensajes de error se muestran al usuario en banners contextuales.
 
-## 🎯 Próximas Mejoras
-
-- [x] ~~Integración con endpoint `GET /api/products`~~ ✅ Implementado
-- [ ] Mostrar stock disponible en el formulario de pedidos
-- [ ] Validación de stock antes de crear pedido
-- [ ] Paginación de pedidos para clientes con muchos pedidos
-- [ ] Filtros y búsqueda de pedidos por estado/fecha
-- [ ] Tests unitarios con Vitest
-- [ ] Tests E2E con Playwright
-- [ ] Modo oscuro
-- [ ] PWA con Service Workers
-
 ## 📄 Licencia
 
 Este proyecto es parte del desafío técnico de Bistrosoft Orders.
